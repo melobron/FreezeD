@@ -324,3 +324,11 @@ class Miner(nn.Module):
 
         output = [self.transform(i) for i in input]
         return output
+
+
+############################################# Model Summary #############################################
+if __name__ == "__main__":
+    G = StyledGenerator()
+    print(G)
+
+
