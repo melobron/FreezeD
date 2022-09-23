@@ -31,6 +31,7 @@ def get_mean_style(generator, device, style_mean_num):
 def generate_samples(generator, device, n_samples, step, alpha, mean_style, style_weight):
     latent = torch.randn(n_samples, 512).to(device)
     imgs = generator(latent, step=step, alpha=alpha, mean_style=mean_style, style_weight=style_weight)
+    imgs = [imgs[i] for i in range(n_samples)]
     return imgs
 
 
@@ -43,29 +44,28 @@ def style_mixing(generator, device, n_source, n_target, step, alpha, mean_style,
     target_imgs = generator(target_code, step=step, alpha=alpha, mean_style=mean_style, style_weight=style_weight)
 
     shape = 4 * (2 ** step)
-    imgs = [torch.ones(1, 3, shape, shape).to(device) * -1]
+    imgs = [torch.ones(3, shape, shape).to(device) * -1]
 
     for i in range(n_source):
-        imgs.append(source_imgs[i].unsqueeze(0))
+        imgs.append(source_imgs[i])
 
     for i in range(n_target):
-        imgs.append(target_imgs[i].unsqueeze(0))
+        imgs.append(target_imgs[i])
         mixed_imgs = generator([target_code[i].unsqueeze(0).repeat(n_source, 1), source_code],
                                step=step, alpha=alpha, mean_style=mean_style, style_weight=style_weight,
                                mixing_range=(0, 1))
         for j in range(n_source):
-            imgs.append(mixed_imgs[j].unsqueeze(0))
-    imgs = torch.cat(imgs, dim=0)
+            imgs.append(mixed_imgs[j])
     return imgs
 
 
 def transform_for_visualization(imgs, rows, cols, mean, std):
     # Tile batch images
-    b, c, h, w = imgs.shape
+    c, h, w = imgs[0].shape
     tile = torch.zeros(size=(c, h*rows, w*cols))
     for i in range(rows):
         for j in range(cols):
-            index = i*rows + j
+            index = i*cols + j
             start_h, start_w = h*i, w*j
             tile[:, start_h:start_h+h, start_w:start_w+w] = imgs[index]
 
@@ -87,7 +87,8 @@ if __name__ == "__main__":
     parser.add_argument('--gpu_num', default=0, type=int)
     parser.add_argument('--seed', default=100, type=int)
     parser.add_argument('--model_path', default='./pre-trained/stylegan-256px-new.model', type=str)
-    parser.add_argument('--dataset_name', default='FFHQ', type=str)
+    # parser.add_argument('--model_path', default='./experiments/exp1/checkpoints/G_200epochs.pth', type=str)
+    parser.add_argument('--dataset_name', default='FFHQ', type=str)  # FFHQ, Dog
     parser.add_argument('--img_size', default=256, type=int)  # Pre-trained model suited for 256
 
     # Mean Style
@@ -125,6 +126,7 @@ if __name__ == "__main__":
     # Model
     generator = StyledGenerator().to(device)
     generator.load_state_dict(torch.load(opt.model_path)['g_running'])
+    # generator.load_state_dict(torch.load('{}'.format(opt.model_path), map_location=device))
     generator.eval()
 
     # Mean Styles

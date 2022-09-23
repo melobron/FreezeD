@@ -4,7 +4,7 @@ import random
 import torch
 from torchvision.transforms import transforms
 
-from metrics.metric import compute_fid,
+# from metrics.metric import compute_fid,
 
 
 ################################# Path & Directory #################################
