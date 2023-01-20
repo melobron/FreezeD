@@ -63,14 +63,14 @@ def requires_grad(model, flag=True, target_layer=None):
 
 
 # Sampling Noise
-def sample_noise(batch_size):
+def sample_noise(batch_size, device):
     if random.random() < 0.9:
-        gen_in11, gen_in12, gen_in21, gen_in22 = torch.randn(4, batch_size, 512, device='cuda').chunk(4, 0)
+        gen_in11, gen_in12, gen_in21, gen_in22 = torch.randn(4, batch_size, 512, device=device).chunk(4, 0)
         gen_in1 = [gen_in11.squeeze(0), gen_in12.squeeze(0)]
         gen_in2 = [gen_in21.squeeze(0), gen_in22.squeeze(0)]
 
     else:
-        gen_in1, gen_in2 = torch.randn(2, batch_size, 512, device='cuda').chunk(2, 0)
+        gen_in1, gen_in2 = torch.randn(2, batch_size, 512, device=device).chunk(2, 0)
         gen_in1 = gen_in1.squeeze(0)
         gen_in2 = gen_in2.squeeze(0)
 

@@ -160,7 +160,7 @@ class TrainStyleGAN:
             with tqdm(self.train_dataloader, desc='Epoch {}'.format(epoch)) as tepoch:
                 for batch, img in enumerate(tepoch):
                     batch_size = img.shape[0]
-                    gen_in1, gen_in2 = sample_noise(batch_size)
+                    gen_in1, gen_in2 = sample_noise(batch_size, device=self.device)
 
                     ########### Update D ###########
                     self.D.zero_grad()
